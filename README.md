@@ -3,6 +3,13 @@
 > SQL 数据血缘可视化工具 —— **网页版**（Pyodide 在浏览器跑 sqlglot，零后端即开即用）
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Deploy](https://github.com/BronyaEVE/LineagePuzzle-Web/actions/workflows/deploy.yml/badge.svg)](https://github.com/BronyaEVE/LineagePuzzle-Web/actions/workflows/deploy.yml)
+
+## 🌐 在线体验
+
+**👉 [https://bronyaeve.github.io/LineagePuzzle-Web/](https://bronyaeve.github.io/LineagePuzzle-Web/)**
+
+打开即用，无需安装。首次加载约 10-15 秒（从 CDN 下载 Pyodide ~6MB + sqlglot），之后浏览器缓存，二次访问很快。
 
 这是 [LineagePuzzle](https://github.com/BronyaEVE/LineagePuzzle) 的网页版分支。桌面版是 Python(FastAPI+sqlglot) 后端 + React 前端的本地部署工具；网页版把**后端 SQL 血缘分析逻辑搬进了浏览器**——用 Pyodide（WebAssembly 版 CPython）在浏览器里直接跑 sqlglot，无需部署任何后端、无需服务器。
 
