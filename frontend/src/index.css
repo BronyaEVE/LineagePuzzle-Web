@@ -1,0 +1,98 @@
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* === 折叠按钮样式（LineageGraph 节点上的 +/- 按钮） === */
+/* ReactFlow 外层节点容器默认 overflow:hidden，会裁切按钮的 top/bottom:-9px。
+   针对自定义节点类型设 overflow:visible，让按钮能露在节点边框外（连线接触处）。
+   参见 https://stackoverflow.com/questions/73986110/ */
+.react-flow__node-collapsible {
+  overflow: visible !important;
+}
+.collapsible-node {
+  /* 撑满 ReactFlow 外层节点（.react-flow__node），让折叠按钮的 top/left/-9px
+     相对于节点边缘定位。用 absolute inset:0 覆盖外层（含 padding 区域），
+     这样按钮 -9px 就到了节点边框外（连线接触处）。 */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* 让点击穿透到外层（ReactFlow 节点选中/拖拽），按钮单独设 auto */
+}
+.collapsible-node > * {
+  pointer-events: auto; /* label 文本和折叠按钮恢复可点击 */
+}
+.collapse-btn {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid #1890ff;
+  color: #1890ff;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  user-select: none;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  font-family: system-ui, sans-serif;
+}
+.collapse-btn:hover {
+  background: #1890ff;
+  color: #fff;
+  transform: scale(1.15);
+}
+/* 折叠态：橙色高亮，提示有隐藏内容可展开 */
+.collapse-btn.collapse-active {
+  background: #fa8c16;
+  border-color: #fa8c16;
+  color: #fff;
+}
+.collapse-btn.collapse-active:hover {
+  background: #d46b08;
+}
+/* TB 布局：入边按钮在顶部，出边按钮在底部 */
+.collapse-top {
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.collapse-top:hover {
+  transform: translateX(-50%) scale(1.15);
+}
+.collapse-bottom {
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.collapse-bottom:hover {
+  transform: translateX(-50%) scale(1.15);
+}
+/* LR 布局：入边按钮在左侧，出边按钮在右侧 */
+.collapse-left {
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.collapse-left:hover {
+  transform: translateY(-50%) scale(1.15);
+}
+.collapse-right {
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.collapse-right:hover {
+  transform: translateY(-50%) scale(1.15);
+}
