@@ -1,26 +1,30 @@
-# 构建 frontend 并部署到 GitHub Pages。
-# push 到 main 自动触发：npm run build → 上传 dist → 发布到 Pages。
+# 构建前端并部署到 GitHub Pages + Cloudflare Pages（双镜像）。
+# push 到 main 自动触发：npm run build → 同时推送到两个静态托管。
 #
-# 访问地址：https://bronyaeve.github.io/LineagePuzzle-Web/
+# 访问地址：
+#   GitHub Pages:    https://bronyaeve.github.io/LineagePuzzle-Web/
+#   Cloudflare Pages: https://lineage-puzzle-web.pages.dev/
 #
-# 首次使用还需在仓库 Settings → Pages → Source 选 "GitHub Actions"。
-name: Deploy to GitHub Pages
+# 首次使用：
+#   1. GitHub Pages: 仓库 Settings → Pages → Source 选 "GitHub Actions"（已配置）
+#   2. Cloudflare Pages: 注册 Cloudflare → 拿 API Token + Account ID
+#      → 填到仓库 Settings → Secrets and variables → Actions：
+#        CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+#      未填这两个 Secret 时，Cloudflare 部署 job 会自动跳过（不影响 GitHub Pages）
+name: Deploy
 
 on:
   push:
     branches: [main]
-  # 支持手动触发（Actions 页面点 Run workflow）
   workflow_dispatch:
 
-# 允许 Pages 部署权限
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 同一时间只跑一个部署（避免并发覆盖）
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: true
 
 jobs:
@@ -46,12 +50,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
 
-  deploy:
+      # 同时上传一个普通 artifact，供 Cloudflare 部署 job 下载复用（避免重复构建）
+      - name: Upload dist for Cloudflare
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: frontend/dist
+          retention-days: 1
+
+  deploy-github-pages:
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -61,3 +73,28 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-cloudflare:
+    needs: build
+    runs-on: ubuntu-latest
+    # 仅当配置了 Cloudflare Secret 时才跑（未配置自动跳过）
+    if: ${{ vars.CLOUDFLARE_CONFIGURED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: frontend/dist
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy frontend/dist --project-name=lineage-puzzle-web
