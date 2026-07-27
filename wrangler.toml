@@ -1,0 +1,5 @@
+# Cloudflare Pages 配置（wrangler 用）。
+# 项目名决定访问域名：lineage-puzzle-web.pages.dev
+name = "lineage-puzzle-web"
+pages_build_output_dir = "frontend/dist"
+compatibility_date = "2025-01-01"
