@@ -92,9 +92,17 @@ jobs:
           name: dist
           path: frontend/dist
 
+      - name: Create Cloudflare Pages project (first run only)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.ACCOUNTID }}
+          # project create 在项目已存在时会非零退出，加 || true 容错（幂等）
+          command: pages project create lineage-puzzle-web --production-branch=main || true
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.ACCOUNTID }}
-          command: pages deploy frontend/dist --project-name=lineage-puzzle-web
+          command: pages deploy frontend/dist --project-name=lineage-puzzle-web --commit-dirty=true
