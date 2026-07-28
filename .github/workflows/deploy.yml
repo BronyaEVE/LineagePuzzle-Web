@@ -94,11 +94,12 @@ jobs:
 
       - name: Create Cloudflare Pages project (first run only)
         uses: cloudflare/wrangler-action@v3
+        # 项目已存在时会失败（正常），continue-on-error 让它不阻断后续 deploy
+        continue-on-error: true
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.ACCOUNTID }}
-          # project create 在项目已存在时会非零退出，加 || true 容错（幂等）
-          command: pages project create lineage-puzzle-web --production-branch=main || true
+          command: pages project create lineage-puzzle-web --production-branch=main
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
