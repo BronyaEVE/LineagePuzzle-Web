@@ -96,5 +96,5 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: ${{ secrets.ACCOUNTID }}
           command: pages deploy frontend/dist --project-name=lineage-puzzle-web
