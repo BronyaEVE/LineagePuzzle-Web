@@ -7,7 +7,10 @@
 
 ## 🌐 在线体验
 
-**👉 [https://bronyaeve.github.io/LineagePuzzle-Web/](https://bronyaeve.github.io/LineagePuzzle-Web/)**
+两个镜像，任选其一（Cloudflare 全球 CDN 通常更快更稳）：
+
+- **Cloudflare Pages**（推荐）：👉 [https://lineage-puzzle-web.pages.dev/](https://lineage-puzzle-web.pages.dev/)
+- **GitHub Pages**：👉 [https://bronyaeve.github.io/LineagePuzzle-Web/](https://bronyaeve.github.io/LineagePuzzle-Web/)
 
 打开即用，无需安装。首次加载约 10-15 秒（从 CDN 下载 Pyodide ~6MB + sqlglot），之后浏览器缓存，二次访问很快。
 
