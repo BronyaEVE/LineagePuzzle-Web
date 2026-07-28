@@ -57,9 +57,42 @@ def analyze_to_dict(script: str, preprocess_rules: list | None = None) -> dict:
     pydantic 模型实例在 Pyodide 里 toJs 会变成 PyProxy，先 model_dump() 成 dict
     再返回，JS 侧用 toJs({dict_converter: Object.fromEntries}) 转普通对象。
     datetime 会序列化成 ISO 字符串（model_dump(mode="json")）。
+
+    preprocess_rules 来自 JS（经 globals.set 传入），可能是 list of JsProxy/Map
+    而非纯 dict。这里统一 to_py 规整成 list[dict]，避免下游 apply_rules 调
+    r.get("enabled") 时 AttributeError: get。
     """
-    result = analyze(script, preprocess_rules)
+    rules = _normalize_rules(preprocess_rules)
+    result = analyze(script, rules)
     return result.model_dump(mode="json")
+
+
+def _normalize_rules(rules) -> list:
+    """把 JS 传入的规则列表规整成纯 Python list[dict]。
+
+    JS Object 经 Pyodide globals.set 可能保持为 JsProxy（无 .get 方法），
+    这里强制走 to_py（深拷贝成原生 Python 类型）。
+    """
+    if not rules:
+        return []
+    # rules 可能是 JsProxy（Array），先整体转成 Python list
+    try:
+        rules = rules.to_py()
+    except AttributeError:
+        pass  # 已经是 Python list
+    result = []
+    for r in rules:
+        if hasattr(r, "to_py"):
+            r = r.to_py()
+        # dict 直接用；其他类型尝试 dict() 转换（Map → dict）
+        if isinstance(r, dict):
+            result.append(r)
+        else:
+            try:
+                result.append(dict(r))
+            except (TypeError, ValueError):
+                continue
+    return result
 
 
 def _build_script_tables(
