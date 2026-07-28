@@ -24,7 +24,30 @@ const scripts = new Map<string, AnalysisResult>();
 const globalEdges: GlobalEdge[] = [];
 
 // === 配置数据（内存默认值）===
-let preprocessRules: PreprocessRule[] = [];
+// 默认锁定规则（与桌面版 store.py:_DEFAULT_LOCKED_RULES 一致）。
+// 这些是核心清洗（去注释），分析前必须执行，否则注释里的内容会干扰 sqlglot 解析。
+const DEFAULT_LOCKED_RULES: PreprocessRule[] = [
+  {
+    id: "builtin-block-comment",
+    name: "去块注释 /* */",
+    // [\s\S] 匹配任意字符（含换行），处理多行 /* ... */ 块注释
+    pattern: "/\\*[\\s\\S]*?\\*/",
+    replacement: "",
+    enabled: true,
+    builtin: true,
+    locked: true,
+  },
+  {
+    id: "builtin-line-comment",
+    name: "去行注释 --",
+    pattern: "--[^\\n]*",
+    replacement: "",
+    enabled: true,
+    builtin: true,
+    locked: true,
+  },
+];
+let preprocessRules: PreprocessRule[] = DEFAULT_LOCKED_RULES.map((r) => ({ ...r }));
 let tagSchema: TagSchema = { dimensions: [] };
 
 let edgeSeq = 0; // 生成 edge_id 用
@@ -234,7 +257,7 @@ export function importAll(data: Record<string, unknown>): void {
 export function _reset(): void {
   scripts.clear();
   globalEdges.length = 0;
-  preprocessRules = [];
+  preprocessRules = DEFAULT_LOCKED_RULES.map((r) => ({ ...r }));
   tagSchema = { dimensions: [] };
   edgeSeq = 0;
 }
